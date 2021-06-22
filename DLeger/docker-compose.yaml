@@ -54,7 +54,7 @@ services:
             - XMN=512m
             - BROKER_NAME=RaftNode00
             - NAMESRV_ADDR=172.18.1.4:9876
-            - LISTEN_PORT=30911
+            - LISTEN_PORT=30902
             - STORE_PATH_ROOT_DIR=/tmp/rmqstore/node
             - STORE_PATH_COMMITLOG=/tmp/rmqstore/node/commitlog
             - D_LEGER_GROUP=RaftNode00
@@ -64,7 +64,7 @@ services:
         volumes:
             - /home/mq/store/node01:/tmp/rmqstore/node
         ports: 
-            - 39011:30911
+            - 30902:30902
         networks:
             rocketmq:
                 ipv4_address: 172.18.1.6
@@ -78,7 +78,7 @@ services:
             - XMN=512m
             - BROKER_NAME=RaftNode00
             - NAMESRV_ADDR=172.18.1.4:9876
-            - LISTEN_PORT=30911
+            - LISTEN_PORT=30903
             - STORE_PATH_ROOT_DIR=/tmp/rmqstore/node
             - STORE_PATH_COMMITLOG=/tmp/rmqstore/node/commitlog
             #节点所属的 raft 组，建议与 brokerName 保持一致，例如 broker-a。
@@ -91,7 +91,7 @@ services:
         volumes:
             - /home/mq/store/node02:/tmp/rmqstore/node
         ports: 
-            - 39011:30911
+            - 30903:30903
         networks:
             rocketmq:
                 ipv4_address: 172.18.1.7
