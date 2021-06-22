@@ -1,80 +1,100 @@
 version: '3.8'
 services:
-  mq-namesrv:
-    container_name: mq-namesrv
-    image: 1101051029/rocketmq-namesrv:0.0.1.beta
-    restart: always
-    tty: true
-    networks:
-      rocketmq:
-        ipv4_address: 172.18.1.4 
-    ports: 
-        - 9876:9876
-  broker-n0:
-    container_name: mq-broker-n0
-    image: 1101051029/rocketmq-dleger-broker:0.0.1.beta
-    environment:
-        - XMS=1g
-        - XMN=512m
-        - BROKER_NAME=RaftNode00
-        - NAMESRV_ADDR=172.18.1.4:9876
-        - LISTEN_PORT=30911
-        - STORE_PATH_ROOT_DIR=/tmp/rmqstore/node
-        - STORE_PATH_COMMITLOG=/tmp/rmqstore/node/commitlog
-        - D_LEGER_GROUP=RaftNode00
-        - D_LEGER_PEERS=n0-172.18.1.5:40911;n1-172.18.1.6:40911;n2-172.18.1.7:40911
-        - D_LEGER_SELF_ID=n0
-        - SEND_MESSAGE_THREAD_POOL_SIZE=16
-    volumes:
-      - /home/mq/store/node00:/tmp/rmqstore/node
-    networks:
-      rocketmq:
-        ipv4_address: 172.18.1.5
+    mq-namesrv:
+        container_name: mq-namesrv
+        image: 1101051029/rocketmq-namesrv:0.0.1.beta
+        restart: always
+        tty: true
+        networks:
+            rocketmq:
+                ipv4_address: 172.18.1.4 
+        ports: 
+            - 9876:9876
+    mq-web:
+        container_name: mq-web
+        image: 1101051029/rocketmq-console:2.0.0
+        restart: always
+        environment: 
+            - JAVA_OPTS=-Drocketmq.namesrv.addr=172.18.1.4:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false
+        ports: 
+            - 8099:8080
+        networks:
+            rocketmq:
+                ipv4_address: 172.18.1.8
+    broker-n0:
+        container_name: mq-broker-n0
+        image: 1101051029/rocketmq-dleger-broker:0.0.1.beta
+        restart: always
+        environment:
+            - XMS=1g
+            - XMN=512m
+            - BROKER_NAME=RaftNode00
+            - NAMESRV_ADDR=172.18.1.4:9876
+            - LISTEN_PORT=30911
+            - STORE_PATH_ROOT_DIR=/tmp/rmqstore/node
+            - STORE_PATH_COMMITLOG=/tmp/rmqstore/node/commitlog
+            - D_LEGER_GROUP=RaftNode00
+            - D_LEGER_PEERS=n0-172.18.1.5:40911;n1-172.18.1.6:40911;n2-172.18.1.7:40911
+            - D_LEGER_SELF_ID=n0
+            - SEND_MESSAGE_THREAD_POOL_SIZE=16
+        volumes:
+            - /home/mq/store/node00:/tmp/rmqstore/node
+        ports: 
+            - 39011:30911
+        networks:
+            rocketmq:
+                ipv4_address: 172.18.1.5
 
-  broker-n1:
-    container_name: mq-broker-n1
-    image: 1101051029/rocketmq-dleger-broker:0.0.1.beta
-    environment:
-        - XMS=1g
-        - XMN=512m
-        - BROKER_NAME=RaftNode00
-        - NAMESRV_ADDR=172.18.1.4:9876
-        - LISTEN_PORT=30911
-        - STORE_PATH_ROOT_DIR=/tmp/rmqstore/node
-        - STORE_PATH_COMMITLOG=/tmp/rmqstore/node/commitlog
-        - D_LEGER_GROUP=RaftNode00
-        - D_LEGER_PEERS=n0-172.18.1.5:40911;n1-172.18.1.6:40911;n2-172.18.1.7:40911
-        - D_LEGER_SELF_ID=n1
-        - SEND_MESSAGE_THREAD_POOL_SIZE=16
-    volumes:
-      - /home/mq/store/node01:/tmp/rmqstore/node
-    networks:
-      rocketmq:
-        ipv4_address: 172.18.1.6
+    broker-n1:
+        container_name: mq-broker-n1
+        image: 1101051029/rocketmq-dleger-broker:0.0.1.beta
+        restart: always
+        environment:
+            - XMS=1g
+            - XMN=512m
+            - BROKER_NAME=RaftNode00
+            - NAMESRV_ADDR=172.18.1.4:9876
+            - LISTEN_PORT=30911
+            - STORE_PATH_ROOT_DIR=/tmp/rmqstore/node
+            - STORE_PATH_COMMITLOG=/tmp/rmqstore/node/commitlog
+            - D_LEGER_GROUP=RaftNode00
+            - D_LEGER_PEERS=n0-172.18.1.5:40911;n1-172.18.1.6:40911;n2-172.18.1.7:40911
+            - D_LEGER_SELF_ID=n1
+            - SEND_MESSAGE_THREAD_POOL_SIZE=16
+        volumes:
+            - /home/mq/store/node01:/tmp/rmqstore/node
+        ports: 
+            - 39011:30911
+        networks:
+            rocketmq:
+                ipv4_address: 172.18.1.6
 
-  broker-n2:
-    container_name: mq-broker-n2
-    image: 1101051029/rocketmq-dleger-broker:0.0.1.beta
-    environment:
-        - XMS=1g
-        - XMN=512m
-        - BROKER_NAME=RaftNode00
-        - NAMESRV_ADDR=172.18.1.4:9876
-        - LISTEN_PORT=30911
-        - STORE_PATH_ROOT_DIR=/tmp/rmqstore/node
-        - STORE_PATH_COMMITLOG=/tmp/rmqstore/node/commitlog
-        #节点所属的 raft 组，建议与 brokerName 保持一致，例如 broker-a。
-        - D_LEGER_GROUP=RaftNode00
-        #多个节点用英文冒号隔开，单个条目遵循   legerSlefId-ip:端口，这里的端口用作 dledger 内部通信。
-        - D_LEGER_PEERS=n0-172.18.1.5:40911;n1-172.18.1.6:40911;n2-172.18.1.7:40911
-        #当前节点id。取自 legerPeers 中条目的开头，即上述示例中的 n0，并且特别需要强调，只能第一个字符为英文，其他字符需要配置成数字。
-        - D_LEGER_SELF_ID=n2
-        - SEND_MESSAGE_THREAD_POOL_SIZE=16
-    volumes:
-        - /home/mq/store/node02:/tmp/rmqstore/node
-    networks:
-        rocketmq:
-            ipv4_address: 172.18.1.7
+    broker-n2:
+        container_name: mq-broker-n2
+        image: 1101051029/rocketmq-dleger-broker:0.0.1.beta
+        restart: always
+        environment:
+            - XMS=1g
+            - XMN=512m
+            - BROKER_NAME=RaftNode00
+            - NAMESRV_ADDR=172.18.1.4:9876
+            - LISTEN_PORT=30911
+            - STORE_PATH_ROOT_DIR=/tmp/rmqstore/node
+            - STORE_PATH_COMMITLOG=/tmp/rmqstore/node/commitlog
+            #节点所属的 raft 组，建议与 brokerName 保持一致，例如 broker-a。
+            - D_LEGER_GROUP=RaftNode00
+            #多个节点用英文冒号隔开，单个条目遵循   legerSlefId-ip:端口，这里的端口用作 dledger 内部通信。
+            - D_LEGER_PEERS=n0-172.18.1.5:40911;n1-172.18.1.6:40911;n2-172.18.1.7:40911
+            #当前节点id。取自 legerPeers 中条目的开头，即上述示例中的 n0，并且特别需要强调，只能第一个字符为英文，其他字符需要配置成数字。
+            - D_LEGER_SELF_ID=n2
+            - SEND_MESSAGE_THREAD_POOL_SIZE=16
+        volumes:
+            - /home/mq/store/node02:/tmp/rmqstore/node
+        ports: 
+            - 39011:30911
+        networks:
+            rocketmq:
+                ipv4_address: 172.18.1.7
 
 networks:
   rocketmq:
